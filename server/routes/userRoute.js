@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const jwtCheck = require("../config/authConfig")
+
 
 const {
     bookVisit,
