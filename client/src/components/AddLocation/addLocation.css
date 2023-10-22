@@ -1,0 +1,9 @@
+.location-container{
+    width:100%;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+         margin-top: 3rem;
+         gap:3rem;
+}
+
