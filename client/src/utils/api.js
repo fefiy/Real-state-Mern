@@ -90,6 +90,7 @@ export const removeBooking = async (id, email, token, privaxios) => {
 
 export const toFav = async (id, email, token, privaxios) => {
   try {
+    console.log("tofav api.js", id)
     await privaxios.post(
       `/user/toFav/${id}`,
       {

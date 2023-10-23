@@ -15,7 +15,7 @@ const LoginForm = () => {
     const navigate = useNavigate()
 
     const {login, err} = useContext(AuthContext)
-  
+   const {currentUser} = useContext(AuthContext)
     // Define validation schema using Yup
     const validationSchema = Yup.object({
       email: Yup.string().email('Invalid email format').required('Email is required'),
@@ -24,10 +24,11 @@ const LoginForm = () => {
   
     const onSubmit = async(values) => {
       console.log("login")
-     navigate("/")
       try{
         await login(values)
-
+        if(currentUser !== null){
+          navigate("/")
+        }
       }catch(err){
        console.log(err)
       }

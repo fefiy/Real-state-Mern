@@ -9,9 +9,11 @@ import ProfileMenu from "../ProfileMenu/ProfileMenu";
 import { AuthContext } from "../../context/AuthContext";
 import AddPropertyModal from "../addPropertyModal/AddPropertyModal";
 import { ToastContainer, toast } from "react-toastify";
+import logo from "../../assets/logo.png"
 const Header = () => {
   const [modalOpened, setModalOpened] = useState(false);
   const { currentUser } = useContext(AuthContext);
+  console.log("user header",currentUser)
   const [menuOpened, setMenuOpened] = useState(false);
   const headerColor = useHeaderColor();
   const handleAddPropertyClick = () => {
@@ -26,7 +28,7 @@ const Header = () => {
     <section className="h-wrapper" style={{ background: headerColor }}>
       <div className="innerWidth  h-container">
         {/* logo */}
-        <img src="./logo.png" alt="logo" width={100} />
+        <img src={logo} alt="logo" width={100} />
 
         {/* menu */}
         <OutsideClickHandler

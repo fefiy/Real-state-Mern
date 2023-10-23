@@ -5,8 +5,7 @@ const {
   getResidency,
 } = require("../controller/residencyController");
 const { verifyTokenUser} = require("../middleware/verifyToken")
-
-router.post("/create", verifyTokenUser, createResidency);
+router.post("/create", createResidency);
 router.get("/allresd", getAllResidencies)
 router.get("/:id", getResidency)
 

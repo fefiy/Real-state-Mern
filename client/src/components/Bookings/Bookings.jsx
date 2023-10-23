@@ -43,7 +43,7 @@ const Bookings = () => {
           {
             data
               .filter((property) =>
-              bookedVisits.map((booking) => booking.id).includes(property.id)
+              bookedVisits.map((booking) => booking.id).includes(property._id)
               )
               .filter(
                 (property) =>

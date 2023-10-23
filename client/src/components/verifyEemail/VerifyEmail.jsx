@@ -23,7 +23,6 @@ const EmailVerify = () => {
 		};
 		verifyEmailUrl();
 	}, [param]);
-
 	return (
 		<>
 			{validUrl ? (

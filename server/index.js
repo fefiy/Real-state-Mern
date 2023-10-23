@@ -4,6 +4,7 @@ const cookieParser = require("cookie-parser")
 const cors = require("cors")
 dotenv.config()
 const app = express()
+const db = require("./config/connectMongo")
 
 // middlewares
 app.use(cors())

@@ -4,9 +4,10 @@ import { useMutation } from "react-query"
 import { checkFavourites, updateFavourites } from "../../utils/common"
 import { toFav } from "../../utils/api"
 import { AuthContext } from "../../context/AuthContext"
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import useAxiosPrivate from "../../hooks/useAxiosPrivate"
 const Heart = ({id}) => {
+    console.log("heart residence id", id)
     const {currentUser, setCurrentUser} = useContext(AuthContext)
     const privateAxios = useAxiosPrivate()
     const [heartColor, setHeartColor] = useState("white")

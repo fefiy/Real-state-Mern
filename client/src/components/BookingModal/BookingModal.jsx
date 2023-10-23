@@ -9,12 +9,11 @@ import { AuthContext } from "../../context/AuthContext.jsx";
 import useAxiosPrivate from "../../hooks/useAxiosPrivate.jsx";
 
 const BookingModal = ({ opened, setOpened, email, propertyId }) => {
-  const privateAxios = useAxiosPrivate()
-  const [value, setValue] = useState(null);
+ const privateAxios = useAxiosPrivate()
+ const [value, setValue] = useState(null);
  const {currentUser, setCurrentUser} = useContext(AuthContext)
  const token = currentUser?.token
  console.log("modal token",token)
-
   const handleBookingSuccess = () => {
     toast.success("You have booked your visit", {
       position: "bottom-right",
@@ -35,6 +34,7 @@ const BookingModal = ({ opened, setOpened, email, propertyId }) => {
 
     localStorage.setItem("user", JSON.stringify(currentUser))
   };
+  console.log("bokking modal property id", propertyId)
 
   console.log(currentUser)
 

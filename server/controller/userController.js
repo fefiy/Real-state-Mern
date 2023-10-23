@@ -1,248 +1,231 @@
-const prisma = require("../config/prismaConfig");
-const asyncHandler = require("express-async-handler");
-var bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const { sendEmail } = require("../config/sendEmail");
-const crypto = require("crypto");
 
+const Token = require('../model/token'); // Your Mongoose Token model
+const asyncHandler = require('express-async-handler');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { sendEmail } = require('../config/sendEmail');
+const crypto = require('crypto');
+const User = require("../model/user")
+
+// Create a User
 const createUser = asyncHandler(async (req, res) => {
-  console.log("creating a user");
+  console.log('Creating a User');
   console.log(req.body);
   const { email, password, name } = req.body;
-  const userExists = await prisma.user.findUnique({ where: { email: email } });
-  if (!userExists) {
+
+  // Check if the User already exists
+  const UserExists = await User.findOne({ email: email });
+
+  if (!UserExists) {
     const salt = bcrypt.genSaltSync(10);
     const hashedPassword = bcrypt.hashSync(password, salt);
-    const newuser = {
+
+    const newUser = new User({
       email,
       name,
       password: hashedPassword,
-    };
-    const user = await prisma.user.create({ data: newuser });
-    tokenValue = crypto.randomBytes(32).toString("hex");
-    await prisma.token.create({
-      data: {
-        userId: user.id,
-        token: tokenValue,
-      },
     });
-    const url = `${process.env.BASE_URL}users/${user.id}/verify/${tokenValue}`;
 
-    await sendEmail(user.email, "Verify Email", url);
+    await newUser.save();
+
+    const TokenValue = crypto.randomBytes(32).toString('hex');
+      console.log("newUser", newUser)
+    const newToken = new Token({
+      userId: newUser._id,
+      token: TokenValue,
+    });
+
+    await newToken.save();
+
+    const url = `${process.env.BASE_URL}Users/${newUser._id}/verify/${TokenValue}`;
+
+    await sendEmail(newUser.email, 'Verify Email', url);
 
     return res.status(201).send({
-      message: "An email has been sent to your account. Please verify.",
+      message: 'An email has been sent to your account. Please verify.',
     });
-  } else res.status(201).send({ message: "User already registered" });
+  } else {
+    res.status(201).send({ message: 'User already registered' });
+  }
 });
 
+// Login
 const login = asyncHandler(async (req, res) => {
-  console.log("login calldedd");
+  console.log('Login called');
   const { email, password } = req.body;
-  const userExists = await prisma.user.findUnique({ where: { email: email } });
-  if (!userExists) {
-    res.status(401).json({ message: "User Doen't exist" });
+
+  const UserExists = await User.findOne({ email: email });
+ console.log("userExiste", UserExists)
+  if (!UserExists) {
+    res.status(401).json({ message: "User doesn't exist" });
   } else {
-    console.log("userExist", userExists);
-    const match = bcrypt.compareSync(password, userExists.password);
+    console.log('User exists', UserExists);
+    const match = bcrypt.compareSync(password, UserExists.password);
+
     if (match) {
-      if (!userExists.verified) {
-        let token = await prisma.token.findFirst({
-          where: { userId: userExists.id },
-        });
+      if (!UserExists.verified) {
+        let token_email = await Token.findOne({ userId: UserExists._id });
+        let TokenValue = token_email ? token_email.token : crypto.randomBytes(32).toString('hex');
 
-        let tokenValue = token?.token;
-
-        if (!token) {
-          tokenValue = crypto.randomBytes(32).toString("hex");
-          await prisma.token.create({
-            data: {
-              userId: userExists.id,
-              token: tokenValue,
-            },
+        if (!token_email) {
+          const newToken = new Token({
+            userId: UserExists._id,
+            token: TokenValue,
           });
+          await newToken.save();
         }
 
-        const url = `${process.env.BASE_URL}users/${userExists.id}/verify/${tokenValue}`;
+        const url = `${process.env.BASE_URL}Users/${UserExists._id}/verify/${TokenValue}`;
         console.log(url);
 
-        await sendEmail(userExists.email, "Verify Email", url);
+        await sendEmail(UserExists.email, 'Verify Email', url);
 
         return res.status(400).send({
-          message: "An email has been sent to your account. Please verify.",
+          message: 'An email has been sent to your account. Please verify.',
         });
       } else {
-        const { password, ...others } = userExists;
-        // create acessToken
-        const accessToken = jwt.sign(
-          { user_id: userExists.id,
-            email :userExists.email,
+        const { password, ...others } = UserExists._doc;
+        const token = jwt.sign(
+          {
+            suer_id: UserExists._id,
+            email: UserExists.email,
           },
-          process.env.ACCESS_TOKEN_SECRET,
-          { expiresIn: "20s" }
+          process.env.ACCESS_Token_SECRET,
+          { expiresIn: '20s' }
         );
-        // user is verified
-        return res.status(200).send({ user: others, token: accessToken });
+
+        return res.status(200).send({ user: others, token});
       }
     } else {
-      res.status(401).json({ message: "Wrong Password" });
+      res.status(401).json({ message: 'Wrong Password' });
     }
   }
 });
 
-const verifyEmail = async (req, res) => {
-  console.log("verify email");
+// Verify Email
+const verifyEmail = asyncHandler(async (req, res) => {
+  console.log('Verify email');
   try {
-    const user = await prisma.user.findUnique({ where: { id: req.params.id } });
-    console.log(user);
-    if (!user) return res.status(400).send({ message: "Invalid link" });
+    const user = await User.findById(req.params.id);
+    console.log(user)
+    if (!user) {
+      return res.status(400).send({ message: 'Invalid link' });
+    }
 
-    const token = await prisma.token.findFirst({
-      where: { userId: user.id, token: req.params.token },
-    });
-    console.log(req.params.token);
-    console.log(token);
-    if (!token) return res.status(400).send({ message: "Invalid link" });
+    const token = await Token.findOne({ userId: user._id, token: req.params.token });
+    console.log(user)
+    console.log(token)
+    if (!token) {
+      return res.status(400).send({ message: 'Invalid link' });
+    }
+    user.verified = true;
+    await user.save();
 
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { verified: true },
-    });
+    await token.remove();
 
-    await prisma.token.delete({
-      where: { id: token.id },
-    });
-
-    res.status(200).send({ message: "Email verified successfully" });
+    res.status(200).send({ message: 'Email verified successfully' });
   } catch (error) {
-    res.status(500).send({ message: "Internal Server Error" });
+    res.status(500).send({ message: 'Internal Server Error' });
   }
-};
+});
+
+
 
 const bookVisit = asyncHandler(async (req, res) => {
-  console.log("book visit");
-  console.log("req.body", req.body);
+  console.log('Book visit');
+  console.log('req.body', req.body);
   const { email, date } = req.body;
   const { id } = req.params;
 
   try {
-    const alreadyBooked = await prisma.user.findUnique({
-      where: { email },
-      select: { bookedVisits: true },
-    });
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
 
-    if (alreadyBooked.bookedVisits.some((visit) => visit.id === id)) {
-      res
-        .status(400)
-        .json({ message: "This residency is already booked by you" });
+    if (user.bookedVisits.some((visit) => visit.id === id)) {
+      res.status(400).json({ message: 'This residency is already booked by you' });
     } else {
-      await prisma.user.update({
-        where: { email: email },
-        data: {
-          bookedVisits: { push: { id, date } },
-        },
-      });
-      res.send("your visit is booked successfully");
+      user.bookedVisits.push({ id, date });
+      await user.save();
+      res.send('Your visit is booked successfully');
     }
   } catch (err) {
     throw new Error(err.message);
   }
 });
 
-// funtion to get all bookings of a user
+// Get all Bookings of a User
 const getAllBookings = asyncHandler(async (req, res) => {
   const { email } = req.body;
   try {
-    const bookings = await prisma.user.findUnique({
-      where: { email },
-      select: { bookedVisits: true },
-    });
-    res.status(200).send(bookings);
+    const User = await User.findOne({ email }).select('bookedVisits');
+    res.status(200).send(User.bookedVisits);
   } catch (err) {
     throw new Error(err.message);
   }
 });
 
+// Cancel Booking
 const cancelBooking = asyncHandler(async (req, res) => {
-  console.log("cancelling booking");
+  console.log('Cancelling booking');
   const { email } = req.body;
   const { id } = req.params;
   try {
-    const user = await prisma.user.findUnique({
-      where: { email: email },
-      select: { bookedVisits: true },
-    });
+    const user = await User.findOne({ email }).select('bookedVisits');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
 
     const index = user.bookedVisits.findIndex((visit) => visit.id === id);
 
     if (index === -1) {
-      res.status(404).json({ message: "Booking not found" });
+      res.status(404).json({ message: 'Booking not found' });
     } else {
       user.bookedVisits.splice(index, 1);
-      await prisma.user.update({
-        where: { email },
-        data: {
-          bookedVisits: user.bookedVisits,
-        },
-      });
-
-      res.send("Booking cancelled successfully");
+      await user.save();
+      res.send('Booking canceled successfully');
     }
   } catch (err) {
     throw new Error(err.message);
   }
 });
 
-// function to add a resd in favourite list of a user
+// Add or Remove Residency in Favorites
 const toFav = asyncHandler(async (req, res) => {
-  console.log("tofav");
+  console.log('Adding to Favorites');
   const { email } = req.body;
-  console.log(req.body);
-  const { rid } = req.params;
+  const id =  req.params.rid;
+  console.log ("req params" ,req.params)
 
   try {
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (user.favResidenciesID.includes(rid)) {
-      const updateUser = await prisma.user.update({
-        where: { email },
-        data: {
-          favResidenciesID: {
-            set: user.favResidenciesID.filter((id) => id !== rid),
-          },
-        },
-      });
-
-      res.send({ message: "Removed from favorites", user: updateUser });
+    const user = await User.findOne({ email });
+    console.log("user from toFav", user)
+    console.log("residenceId from toFav", id)
+    if (user.favResidenciesID.includes(id)) {
+      user.favResidenciesID = user.favResidenciesID.filter((id) => id !== id);
+      await user.save();
+      console.log("remove favourites")
+      res.send({ message: 'Removed from favorites', user });
     } else {
-      const updateUser = await prisma.user.update({
-        where: { email },
-        data: {
-          favResidenciesID: {
-            push: rid,
-          },
-        },
-      });
-      res.send({ message: "Updated favorites", user: updateUser });
+      console.log("add favourites")
+      user.favResidenciesID.push(id);
+      await user.save();
+      res.send({ message: 'Updated favorites', user });
     }
   } catch (err) {
     throw new Error(err.message);
   }
 });
 
-// function to get all favorites
+// Get All Favorites
 const getAllFavorites = asyncHandler(async (req, res) => {
   const { email } = req.body;
   try {
-    const favResd = await prisma.user.findUnique({
-      where: { email },
-      select: { favResidenciesID: true },
-    });
-    res.status(200).send(favResd);
+    const User = await User.findOne({ email }).select('favResidenciesID');
+    res.status(200).send(User.favResidenciesID);
   } catch (err) {
-    throw new Error(err.message);
+    throw Error(err.message);
   }
 });
 

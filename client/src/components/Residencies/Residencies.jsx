@@ -19,7 +19,7 @@ const Residencies = () => {
       </div>
     );
   }
-
+  console.log("residencies", data)
   if (isLoading) {
     return (
       <div className="wrapper flexCenter" style={{ height: "60vh" }}>

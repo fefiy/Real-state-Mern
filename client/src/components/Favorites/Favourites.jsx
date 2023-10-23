@@ -44,7 +44,7 @@ const Favourites = () => {
           {
             data
               .filter((property) =>
-              favResidenciesID.map((fav) => fav).includes(property.id)
+              favResidenciesID.map((fav) => fav).includes(property._id)
               )
               .filter(
                 (property) =>

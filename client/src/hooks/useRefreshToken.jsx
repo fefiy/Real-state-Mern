@@ -13,11 +13,11 @@ const useRefreshToken = () => {
       if (response?.data) {
         console.log("refreshToken", response)
         setCurrentUser((prev)=> (
-            {...prev, token:response.data}
+            {...prev, token:response.data.accessToken}
         ))
         console.log("refrshToken from userrefreshtoken", response)
         localStorage.setItem("user", JSON.stringify(currentUser))
-        return response.data;
+        return response.data.accessToken
       }
     } catch (err) {
       console.log(err);

@@ -20,21 +20,21 @@ import Heart from "../../components/Heart/Heart";
 import useAxiosPrivate from "../../hooks/useAxiosPrivate";
 
 const Property = () => {
-  const privateAxios = useAxiosPrivate()
+  const privateAxios = useAxiosPrivate();
   const { pathname } = useLocation();
   const id = pathname.split("/").slice(-1)[0];
   const { data, isLoading, isError } = useQuery(["resd", id], () =>
     getProperty(id)
   );
-  
+
   const [modalOpened, setModalOpened] = useState(false);
-  const {currentUser, setCurrentUser} = useContext(AuthContext)
-  const user= currentUser?.user;
-  console.log(user)
-  const token = currentUser?.token
- const bookings = user?.bookedVisits
-  console.log(user)
-  console.log("bokings", bookings)
+  const { currentUser, setCurrentUser } = useContext(AuthContext);
+  const user = currentUser?.user;
+  console.log(user);
+  const token = currentUser?.token;
+  const bookings = user?.bookedVisits;
+  console.log(user);
+  console.log("bokings", bookings);
   if (isError) {
     return (
       <div className="wrapper">
@@ -43,7 +43,7 @@ const Property = () => {
     );
   }
 
-  console.log("user", currentUser)
+  console.log("user", currentUser);
   const { mutate: cancelBooking, isLoading: cancelling } = useMutation({
     mutationFn: () => removeBooking(id, user?.email, token, privateAxios),
     onSuccess: () => {
@@ -51,11 +51,13 @@ const Property = () => {
         ...prev,
         user: {
           ...prev.user,
-          bookedVisits: prev.user.bookedVisits.filter((booking) => booking.id !== id),
+          bookedVisits: prev.user.bookedVisits.filter(
+            (booking) => booking.id !== id
+          ),
         },
       }));
-      
-      localStorage.setItem("user", JSON.stringify(currentUser))
+
+      localStorage.setItem("user", JSON.stringify(currentUser));
       toast.success("Booking cancelled");
     },
   });
@@ -75,7 +77,7 @@ const Property = () => {
   }
 
   return (
-    <div className="wrapper" style={{marginTop:"3.5rem"}}>
+    <div className="wrapper" style={{ marginTop: "3.5rem" }}>
       <div className="paddings flexCenter property-container innerWidth">
         <div className="like">
           <Heart id={id} />
@@ -122,7 +124,7 @@ const Property = () => {
                 {data?.address} {data?.city} {data?.country}
               </span>
             </div>
-            
+
             {bookings?.map((booking) => booking.id).includes(id) ? (
               <>
                 <Button
@@ -130,8 +132,7 @@ const Property = () => {
                   w={"100%"}
                   color="red"
                   onClick={() => cancelBooking()}
-                  disabled={cancelling}
-                >
+                  disabled={cancelling}>
                   <span>Cancel booking</span>
                 </Button>
                 <span>
@@ -143,17 +144,16 @@ const Property = () => {
               <button
                 className="button"
                 onClick={() => {
-                  if(currentUser == null){
-                    toast.error("You have to be Logged in")
-                  }else{
-                    setModalOpened(true)
+                  if (currentUser == null) {
+                    toast.error("You have to be Logged in");
+                  } else {
+                    setModalOpened(true);
                   }
-                }}
-              >
+                }}>
                 Book your visit
               </button>
             )}
-          
+
             <BookingModal
               opened={modalOpened}
               setOpened={setModalOpened}
@@ -162,7 +162,7 @@ const Property = () => {
             />
           </div>
           <div className="right">
-          <Map
+            <Map
               address={data?.address}
               city={data?.city}
               country={data?.country}
@@ -171,17 +171,17 @@ const Property = () => {
         </div>
       </div>
       <ToastContainer
-position="bottom-right"
-autoClose={5000}
-hideProgressBar={false}
-newestOnTop={false}
-closeOnClick
-rtl={false}
-pauseOnFocusLoss
-draggable
-pauseOnHover
-theme="light"
-/>
+        position="bottom-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </div>
   );
 };
