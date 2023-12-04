@@ -15,8 +15,8 @@ const Properties = () => {
       </div>
     );
   }
-
-  if (isLoading) {
+  console.log("properties from prop" ,data)
+  if (isLoading || data.length == 0 || data== undefined ) {
     return (
       <div className="wrapper flexCenter" style={{ height: "60vh" }}>
         <PuffLoader
@@ -32,9 +32,12 @@ const Properties = () => {
 
   console.log(data)
   return (
+
    <div className='wrapper'>
     <div className='properties-container flexCenter paddings innerWidth'>
         <SearchBar filter={filter} setFilter={setFilter} />
+        {
+          data.length > 0 &&
         <div className="paddings flexCenter properties">
           {
             data
@@ -49,7 +52,10 @@ const Properties = () => {
               ))
           }
         </div>
+  }
+
     </div>
+
    </div>
   )
 }
