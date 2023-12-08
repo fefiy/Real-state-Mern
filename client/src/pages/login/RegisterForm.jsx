@@ -88,7 +88,7 @@ const RegisterForm = () => {
       {formik.touched.password && formik.errors.password ? (
         <div className="error">{formik.errors.password}</div>
       ) : null}
-      {msg&& <div style={{color:red, fontSize:24, margin:4}}>{msg}</div>}
+      {msg&& <div style={{color:"red", fontSize:24, margin:4}}>{msg}</div>}
       <input type="submit" className="btn" value="Sign up" />
     </form>
   );

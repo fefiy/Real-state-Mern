@@ -6,7 +6,6 @@ export  const makeRequest = axios.create({
     headers:true
 })
 
-
 export  const privateAxios = axios.create({
     baseURL:"https://real-state-nodejs.onrender.com/api",
     headers:true
