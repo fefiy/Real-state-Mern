@@ -2,12 +2,12 @@ import axios from "axios"
 
 
 export  const makeRequest = axios.create({
-    baseURL:"http://localhost:4200/api",
+    baseURL:"https://real-state-nodejs.onrender.com/api",
     headers:true
 })
 
 
 export  const privateAxios = axios.create({
-    baseURL:"http://localhost:4200/api",
+    baseURL:"https://real-state-nodejs.onrender.com/api",
     headers:true
 })
