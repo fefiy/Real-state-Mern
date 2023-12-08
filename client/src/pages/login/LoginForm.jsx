@@ -79,7 +79,7 @@ const LoginForm = () => {
         ) : null}
         <input type="submit" value="Login" className="btn solid" />
 
-        {err && <div style={{color:red, fontSize:24, margin:4}}>{err.message}</div>}
+        {err && <div style={{color:"red", fontSize:24, margin:4}}>{err.message}</div>}
       </form>
     );
   };
