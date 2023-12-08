@@ -36,6 +36,7 @@ const LoginForm = () => {
     };
   
     // Initialize Formik
+    console.log(currentUser)
     const formik = useFormik({
       initialValues,
       validationSchema,

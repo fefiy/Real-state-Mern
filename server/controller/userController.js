@@ -53,7 +53,6 @@ const createUser = asyncHandler(async (req, res) => {
 const login = asyncHandler(async (req, res) => {
   console.log('Login called');
   const { email, password } = req.body;
-
   const UserExists = await User.findOne({ email: email });
  console.log("userExiste", UserExists)
   if (!UserExists) {
@@ -61,7 +60,6 @@ const login = asyncHandler(async (req, res) => {
   } else {
     console.log('User exists', UserExists);
     const match = bcrypt.compareSync(password, UserExists.password);
-
     if (match) {
       if (!UserExists.verified) {
         let token_email = await Token.findOne({ userId: UserExists._id });
@@ -90,7 +88,7 @@ const login = asyncHandler(async (req, res) => {
             suer_id: UserExists._id,
             email: UserExists.email,
           },
-          process.env.ACCESS_Token_SECRET,
+          process.env.ACCESS_TOKEN_SECRET,
           { expiresIn: '20s' }
         );
 
