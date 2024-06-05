@@ -20,6 +20,7 @@ const RegisterForm = () => {
     password: Yup.string().required('Password is required'),
   });
 
+  
   const onSubmit = async(values) => {
     try{
       const response = await makeRequest.post("/user/register", values)

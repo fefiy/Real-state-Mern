@@ -9,8 +9,8 @@ import { AuthContext } from '../../context/AuthContext';
 const LoginForm = () => {
     // Define the initial form values
     const initialValues = {
-      email: '',
-      password: '',
+      email: 'foziayimam57@gmail.com',
+      password: 'fefu123',
     };
     const navigate = useNavigate()
 
